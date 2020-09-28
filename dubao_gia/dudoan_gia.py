@@ -88,10 +88,12 @@ def predict_realestate_price(realestate_type: int, address_district: int, period
     
     # Get estimate data
     estimated_data = get_dates_and_price(coeff, intercept, min_date,min_date, today)
+   
 
     # Get predicted data 
     predicted_data = get_dates_and_price(
         coeff, intercept, min_date, today, end_date)
+    
 
     # Get historical data 
     historical_data = get_sample_data(self.X, self.y)
@@ -249,7 +251,7 @@ def get_dates_and_price(coeff: float, intercept: float, min_date, start_date, en
 def get_sample_data(X, y):
     sample_data = []
     for i in range(0, len(X)):
-        sample_data.append(dict(date=X[i], price=y[i]))
+        sample_data.append(dict(date=datetime.fromtimestamp(X[i]), price=y[i]))
     return sample_data
 
 
