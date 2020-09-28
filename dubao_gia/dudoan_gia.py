@@ -72,63 +72,32 @@ def predict_realestate_price(realestate_type: int, address_district: int, period
     # Building Model
     ######################################################
 
-    # Input and Output Declaration
-    X = [posts['time_since_first_post']]
-    y = [posts['price_per_m2']]
-
-    X_train, X_test, y_train, y_test = train_test_split(X=X, y=y, degree=2)
-
-    model = regression_model(X, y)
-
+    model = SharkLandRegression()
+    
     ###########################
-    # Equation of price line
-    ###########################
-    intercept = model.intercept_
-    coeff = model.coef_
-    ###########################
+
 
     ###########################
     # Results
     ###########################
-    today = datetime.timestamp(datetime.now())
-    start_date = min(X_train.)
-    end_date_after_period = today + relativedelta(months=period)
-    estimated_data = get_dates_and_price(coeff, intercept, start_date, today)
+    coeff = linear_model.coef_
+    intercept = model.model.intercept_
+    today = datetime.today()
+    end_date = today + relativedelta(months=period)
+    min_date = min(model.X_train)
+    
+    # Get estimate data
+    estimated_data = get_dates_and_price(coeff, intercept, min_date,min_date, today)
+
+    # Get predicted data 
     predicted_data = get_dates_and_price(
-        coeff, intercept, today, end_date_after_period)
-    historical_data = get_sample_data(X, y)
+        coeff, intercept, min_date, today, end_date)
+
+    # Get historical data 
+    historical_data = get_sample_data(self.X, self.y)
 
     return dict(estimated_data=estimated_data, predicted_data=predicted_data, historical_data=historical_data)
 
-
-def train_test_split(X, y, degree):
-
-    X = np.array(X).reshape(-1, 1)
-    y = np.array(y).reshape(-1, 1)
-
-    poly = PolynomialFeatures(degree=degree)
-    X_poly = poly.fit_transform(X)
-
-    rs = ShuffleSplit(n_splits=1, test_size=0.25,
-                      train_size=0.75, random_state=42)
-    for i, (train, test) in enumerate(rs.split(X, y)):
-        X_train = [X[i] for i in train]
-        X_test = [X[i]for i in test]
-        y_train = [y[i] for i in train]
-        y_test = [y[i]for i in test]
-    return X_train, X_test, y_train, y_test
-
-
-def regression_model(X, y):
-
-    # Training set: train the model
-    # Testing set : evaluate the accuracy of the model
-    X_train, X_test, y_train, y_test = train_test_split(X, y, 2)
-
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-
-    return model
 
 
 def pre_processing_data(posts):
@@ -230,33 +199,50 @@ def calculate_post_dates(posts):
     return posts
 
 
-# def get_historical_data(coeff: float, intercept: float, current_date, start_date):
-#     historical_data = []
-#     previous_date = start_date
-#     while previous_date <= current_date:
-#         historical_data.append(
-#             dict(date=previous_date, price=datetime.timestamp(previous_date) * coeff + intercept))
-#         previous_date += timedelta(days=1)
+class SharkLandRegression():
 
-#     return historical_data
+    def __init__(self, posts): 
+        
+        self.x = posts[['time_since_first_post']
+        self.y = post['price_per_m2']
+        self.X_train, self.X_test, self.y_train, self.y_test = self.train_test_split()
+        self.model = self.createModel
+    
+    def train_test_split(self): 
+    
+        X = np.array(self.X).reshape(-1, 1)
+        y = np.array(self.y).reshape(-1, 1)
+    
+        poly = PolynomialFeatures(degree=degree)
+        X_poly = poly.fit_transform(self.X)
 
+        rs = ShuffleSplit(n_splits=1, test_size=0.25,
+                      train_size=0.75, random_state=42)
+        for i, (train, test) in enumerate(rs.split(X, y)):
+            X_train = [self.X[i] for i in train]
+            X_test = [self.X[i]for i in test]
+            y_train = [self.y[i] for i in train]
+            y_test = [self.y[i]for i in test]
+        return X_train, X_test, y_train, y_test
 
-# def get_forecast_data(coeff: float, intercept: float, current_date, period: int):
+    def createModel(self): 
+        model = LinearRegression()
+        model.fit(self.X_train, self.y_train)
+        return model
+    
+    def model_error(self): 
+        prediction = self.model.predict(X_test)
+        error = mean_squared_error(y_test, predicition)
+        print("Mean Square Error : {}".format(error))
+        return error
+    
 
-#     end_date = start_date + relativedelta(months=period)
-#     forecast_data = []
-#     while current_date <= end_date:
-#         forecast_data.append(dict(date=current_date, price=datetime.timestamp(
-#             current_date) * coeff + intercept))
-
-#     return forecast_data
-
-
-def get_dates_and_price(coeff: float, intercept: float, start_date, end_date):
+def get_dates_and_price(coeff: float, intercept: float, min_date, start_date, end_date):
     result = []
     while start_date <= end_date:
-        result.append(dict(date=start_date, price=datetime.timestamp(
-            start_date) * coeff + intercept))
+        result.append(dict(date=start_date, \
+            price= (datetime.timestamp(start_date)- float(min_date)/3600/24,2)*coeff-intercept
+        start_date += timedelta(days = 1)
     return result
 
 
