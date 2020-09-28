@@ -1,6 +1,4 @@
-
-from dubao_gia import posts_info
-from dubao_gia.utils import convert_price_sell
+from utils import convert_price_sell, post_info
 from datetime import datetime, timedelta
 from dateutil import relativedelta
 import time
@@ -72,7 +70,7 @@ def predict_realestate_price(realestate_type: int, address_district: int, period
     # Building Model
     ######################################################
 
-    model = SharkLandRegression()
+    linear_model = SharkLandRegression(posts)
     
     ###########################
 
@@ -80,8 +78,8 @@ def predict_realestate_price(realestate_type: int, address_district: int, period
     ###########################
     # Results
     ###########################
-    coeff = linear_model.coef_
-    intercept = model.model.intercept_
+    coeff = linear_model.model.coef_
+    intercept = linear_model.model.intercept_
     today = datetime.today()
     end_date = today + relativedelta(months=period)
     min_date = min(model.X_train)
@@ -110,18 +108,15 @@ def pre_processing_data(posts):
         - price_per_m2
     Some other features may be normalized for future improvements: 
         - address_district ===> address_district_normalized:
-            ###############################################
+            ######
             Some streets may have mixed with city_name 
             => normalization would differentiate the street_name only
-            ###############################################
+            ######
         - post_date ===> post_date_normalized
-            ###############################################
+            ######
             Take out the min post date to be first post 
             => Then considering time_delta for each post from that first_post 
             => This post_date_normalized is input to the Linear Regression Model (for first attempt)
-
-    ################ Any improvement may be taken place later #######################
-
     '''
 
     # Normalize address_district for later used \
@@ -132,10 +127,11 @@ def pre_processing_data(posts):
     # If area_cal is not improved, drop the record
     for x in range(0, len(posts)):
         if (posts['area_cal'].iloc[x] == 0) or (posts.loc['area_cal'].iloc[x] < 0):
-            response = requests.post(url='http://localhost:5010/api/make_up_alternative', json={
-                "post_id": posts['id'].iloc[x],
+            data = {
+                "post_id": posts['id'].iloc[x], 
                 "request_number_list": [2]
-            }, headers={})
+            }
+            response = requests.post(url='http://localhost:5010/api/make_up_alternative', json=data, headers={})
             posts['area_cal'].iloc[x] = response.value[0]
 
     posts = posts[posts['area_cal'] > 0]
@@ -207,7 +203,7 @@ class SharkLandRegression():
         
         self.x = posts[['time_since_first_post']
         self.y = post['price_per_m2']
-        self.X_train, self.X_test, self.y_train, self.y_test = self.train_test_split()
+        self.X_train, self.X_test, self.y_train, self.y_test = self.train_test_split
         self.model = self.createModel
     
     def train_test_split(self): 
@@ -255,4 +251,4 @@ def get_sample_data(X, y):
     return sample_data
 
 
-predict_realestate_price(realestate_type=2, address_district=11, period=3)
+# predict_realestate_price(realestate_type=2, address_district=11, period=3)
