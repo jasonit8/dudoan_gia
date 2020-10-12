@@ -62,7 +62,7 @@ Case 5: Các trường hợp còn lại cho bằng 0
 '''
 
 
-def convert_price_sell(realestate_type, price_sell, area_cal, floor) -> float:
+def convert_price_sell(realestate_type, price_sell, area_cal, floor) -> (float):
     price_construction = [3500000, 4500000, 5500000]
     # realestate_type = post['realestate-type']
     # price_sell = post['price_sell']
