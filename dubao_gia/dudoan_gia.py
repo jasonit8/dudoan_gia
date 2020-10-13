@@ -201,8 +201,8 @@ class SharkLandRegression():
 
     def __init__(self, posts): 
         
-        self.x = posts[['time_since_first_post']
-        self.y = post['price_per_m2']
+        self.x = posts[['time_since_first_post']]
+        self.y = posts['price_per_m2']
         self.X_train, self.X_test, self.y_train, self.y_test = self.train_test_split
         self.model = self.createModel
     
